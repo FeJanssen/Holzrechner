@@ -16,9 +16,15 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
+        }
+
+        .wrapper {
             display: flex;
+            gap: 30px;
+            max-width: 1400px;
+            margin: 0 auto;
+            flex-wrap: wrap;
             justify-content: center;
-            align-items: center;
         }
 
         .container {
@@ -28,6 +34,8 @@
             padding: 40px;
             max-width: 600px;
             width: 100%;
+            flex: 1;
+            min-width: 500px;
         }
 
         h1 {
@@ -147,6 +155,10 @@
             animation: fadeIn 0.5s ease;
         }
 
+        .result.quadrat {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -189,8 +201,10 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>📐 Kubik Rechner</h1>
+    <div class="wrapper">
+        <!-- Kubik Rechner -->
+        <div class="container">
+            <h1>📐 Kubik Rechner</h1>
         
         <div class="input-group">
             <label for="laenge">Länge (m):</label>
@@ -220,6 +234,37 @@
             <div class="total" id="totalVolume">0.00</div>
             <div class="unit">m³</div>
             <div class="details" id="details"></div>
+        </div>
+        </div>
+
+        <!-- Quadratmeter Rechner -->
+        <div class="container">
+            <h1>📏 Quadratmeter Rechner</h1>
+            
+            <div class="input-group">
+                <label for="breiteQM">Breite (cm):</label>
+                <input type="number" id="breiteQM" step="1" min="0" placeholder="z.B. 300">
+            </div>
+
+            <div class="input-group">
+                <label>Längen (m):</label>
+                <div class="breiten-container" id="laengenContainer">
+                    <div class="breite-item">
+                        <input type="number" class="laenge-input" step="0.01" min="0" placeholder="z.B. 5.5">
+                        <button class="remove-btn" onclick="removeLaenge(this)">✕</button>
+                    </div>
+                </div>
+                <button class="add-btn" onclick="addLaenge()">+ Länge hinzufügen</button>
+            </div>
+
+            <button class="calculate-btn" onclick="berechnenQM()">Berechnen</button>
+
+            <div class="result quadrat" id="resultQM">
+                <h2>Gesamtfläche</h2>
+                <div class="total" id="totalArea">0.00</div>
+                <div class="unit">m²</div>
+                <div class="details" id="detailsQM"></div>
+            </div>
         </div>
     </div>
 
@@ -304,27 +349,109 @@
             document.getElementById('result').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
 
-        // Enter-Taste zum nächsten Feld / neue Breite hinzufügen
+        // Quadratmeter Rechner Funktionen
+        function addLaenge() {
+            const container = document.getElementById('laengenContainer');
+            const newItem = document.createElement('div');
+            newItem.className = 'breite-item';
+            newItem.innerHTML = `
+                <input type="number" class="laenge-input" step="0.01" min="0" placeholder="z.B. 5.5">
+                <button class="remove-btn" onclick="removeLaenge(this)">✕</button>
+            `;
+            container.appendChild(newItem);
+        }
+
+        function removeLaenge(button) {
+            const container = document.getElementById('laengenContainer');
+            const items = container.querySelectorAll('.breite-item');
+            
+            if (items.length > 1) {
+                button.parentElement.remove();
+            } else {
+                alert('Mindestens eine Länge muss eingegeben werden!');
+            }
+        }
+
+        function berechnenQM() {
+            const breiteCM = parseFloat(document.getElementById('breiteQM').value);
+            const laengenInputs = document.querySelectorAll('.laenge-input');
+            
+            // Validierung
+            if (!breiteCM || breiteCM <= 0) {
+                alert('Bitte geben Sie eine gültige Breite ein!');
+                return;
+            }
+
+            let laengen = [];
+            for (let input of laengenInputs) {
+                const laenge = parseFloat(input.value);
+                if (laenge && laenge > 0) {
+                    laengen.push(laenge);
+                }
+            }
+
+            if (laengen.length === 0) {
+                alert('Bitte geben Sie mindestens eine gültige Länge ein!');
+                return;
+            }
+
+            // Umrechnung
+            const breite = breiteCM / 100; // cm zu m
+
+            // Berechnung
+            let gesamtFlaeche = 0;
+            let detailsHTML = '';
+
+            laengen.forEach((laenge, index) => {
+                const flaeche = laenge * breite;
+                gesamtFlaeche += flaeche;
+                detailsHTML += `
+                    <div class="detail-item">
+                        <span>Länge ${index + 1}: ${laenge.toFixed(2)} m</span>
+                        <span>${flaeche.toFixed(2)} m²</span>
+                    </div>
+                `;
+            });
+
+            // Ergebnis anzeigen
+            document.getElementById('totalArea').textContent = gesamtFlaeche.toFixed(2);
+            document.getElementById('detailsQM').innerHTML = detailsHTML;
+            document.getElementById('resultQM').style.display = 'block';
+
+            // Sanftes Scrollen zum Ergebnis
+            document.getElementById('resultQM').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // Enter-Taste zum nächsten Feld / neue Breite/Länge hinzufügen
         document.addEventListener('keypress', function(event) {
             if (event.key === 'Enter') {
                 event.preventDefault();
                 const activeElement = document.activeElement;
                 
-                // Wenn in einem Breite-Input, füge neue Breite hinzu
+                // Kubik Rechner
                 if (activeElement.classList.contains('breite-input')) {
                     addBreite();
-                    // Fokussiere das neue Input-Feld
                     setTimeout(() => {
                         const breitenInputs = document.querySelectorAll('.breite-input');
                         breitenInputs[breitenInputs.length - 1].focus();
                     }, 10);
                 }
-                // Wenn in Länge oder Stärke, zum nächsten Feld
                 else if (activeElement.id === 'laenge') {
                     document.getElementById('staerke').focus();
                 }
                 else if (activeElement.id === 'staerke') {
                     document.querySelector('.breite-input').focus();
+                }
+                // Quadratmeter Rechner
+                else if (activeElement.classList.contains('laenge-input')) {
+                    addLaenge();
+                    setTimeout(() => {
+                        const laengenInputs = document.querySelectorAll('.laenge-input');
+                        laengenInputs[laengenInputs.length - 1].focus();
+                    }, 10);
+                }
+                else if (activeElement.id === 'breiteQM') {
+                    document.querySelector('.laenge-input').focus();
                 }
             }
         });
