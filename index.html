@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kubik Rechner</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 2em;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .breiten-container {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .breite-item {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+
+        .breite-item input {
+            flex: 1;
+        }
+
+        .remove-btn {
+            background: #ff4757;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .remove-btn:hover {
+            background: #ee5a6f;
+            transform: translateY(-2px);
+        }
+
+        .add-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            width: 100%;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            font-size: 1em;
+        }
+
+        .add-btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        .calculate-btn {
+            background: #2ecc71;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 700;
+            width: 100%;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+        }
+
+        .calculate-btn:hover {
+            background: #27ae60;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(46, 204, 113, 0.3);
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            text-align: center;
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result h2 {
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .result .total {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+
+        .result .unit {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .details {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 0.95em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📐 Kubik Rechner</h1>
+        
+        <div class="input-group">
+            <label for="laenge">Länge (m):</label>
+            <input type="number" id="laenge" step="0.01" min="0" placeholder="z.B. 5.5">
+        </div>
+
+        <div class="input-group">
+            <label for="staerke">Stärke (mm):</label>
+            <input type="number" id="staerke" step="1" min="0" placeholder="z.B. 200">
+        </div>
+
+        <div class="input-group">
+            <label>Breiten (cm):</label>
+            <div class="breiten-container" id="breitenContainer">
+                <div class="breite-item">
+                    <input type="number" class="breite-input" step="1" min="0" placeholder="z.B. 300">
+                    <button class="remove-btn" onclick="removeBreite(this)">✕</button>
+                </div>
+            </div>
+            <button class="add-btn" onclick="addBreite()">+ Breite hinzufügen</button>
+        </div>
+
+        <button class="calculate-btn" onclick="berechnen()">Berechnen</button>
+
+        <div class="result" id="result">
+            <h2>Gesamtvolumen</h2>
+            <div class="total" id="totalVolume">0.00</div>
+            <div class="unit">m³</div>
+            <div class="details" id="details"></div>
+        </div>
+    </div>
+
+    <script>
+        function addBreite() {
+            const container = document.getElementById('breitenContainer');
+            const newItem = document.createElement('div');
+            newItem.className = 'breite-item';
+            newItem.innerHTML = `
+                <input type="number" class="breite-input" step="1" min="0" placeholder="z.B. 300">
+                <button class="remove-btn" onclick="removeBreite(this)">✕</button>
+            `;
+            container.appendChild(newItem);
+        }
+
+        function removeBreite(button) {
+            const container = document.getElementById('breitenContainer');
+            const items = container.querySelectorAll('.breite-item');
+            
+            // Mindestens eine Breite muss vorhanden bleiben
+            if (items.length > 1) {
+                button.parentElement.remove();
+            } else {
+                alert('Mindestens eine Breite muss eingegeben werden!');
+            }
+        }
+
+        function berechnen() {
+            const laenge = parseFloat(document.getElementById('laenge').value); // in Metern
+            const staerkeMM = parseFloat(document.getElementById('staerke').value); // in mm
+            const breitenInputs = document.querySelectorAll('.breite-input');
+            
+            // Validierung
+            if (!laenge || laenge <= 0) {
+                alert('Bitte geben Sie eine gültige Länge ein!');
+                return;
+            }
+            
+            if (!staerkeMM || staerkeMM <= 0) {
+                alert('Bitte geben Sie eine gültige Stärke ein!');
+                return;
+            }
+
+            let breitenCM = [];
+            for (let input of breitenInputs) {
+                const breite = parseFloat(input.value);
+                if (breite && breite > 0) {
+                    breitenCM.push(breite);
+                }
+            }
+
+            if (breitenCM.length === 0) {
+                alert('Bitte geben Sie mindestens eine gültige Breite ein!');
+                return;
+            }
+
+            // Umrechnung in Meter
+            const staerke = staerkeMM / 1000; // mm zu m
+
+            // Berechnung
+            let gesamtVolumen = 0;
+            let detailsHTML = '';
+
+            breitenCM.forEach((breiteCM, index) => {
+                const breite = breiteCM / 100; // cm zu m
+                const volumen = laenge * breite * staerke;
+                gesamtVolumen += volumen;
+                detailsHTML += `
+                    <div class="detail-item">
+                        <span>Breite ${index + 1}: ${breiteCM} cm</span>
+                        <span>${volumen.toFixed(3)} m³</span>
+                    </div>
+                `;
+            });
+
+            // Ergebnis anzeigen
+            document.getElementById('totalVolume').textContent = gesamtVolumen.toFixed(3);
+            document.getElementById('details').innerHTML = detailsHTML;
+            document.getElementById('result').style.display = 'block';
+
+            // Sanftes Scrollen zum Ergebnis
+            document.getElementById('result').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // Enter-Taste zum nächsten Feld / neue Breite hinzufügen
+        document.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                const activeElement = document.activeElement;
+                
+                // Wenn in einem Breite-Input, füge neue Breite hinzu
+                if (activeElement.classList.contains('breite-input')) {
+                    addBreite();
+                    // Fokussiere das neue Input-Feld
+                    setTimeout(() => {
+                        const breitenInputs = document.querySelectorAll('.breite-input');
+                        breitenInputs[breitenInputs.length - 1].focus();
+                    }, 10);
+                }
+                // Wenn in Länge oder Stärke, zum nächsten Feld
+                else if (activeElement.id === 'laenge') {
+                    document.getElementById('staerke').focus();
+                }
+                else if (activeElement.id === 'staerke') {
+                    document.querySelector('.breite-input').focus();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
